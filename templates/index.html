@@ -202,6 +202,33 @@
         });
         renderTable(filteredData, searchText); // Render table with filtered data
     });
+
+    // Event listener for the "Prev" button
+    var prevButton = document.querySelector('#prevButton');
+    prevButton.addEventListener('click', function () {
+        var today = new Date();
+        var filteredData = data.filter(function (obj) {
+            // Set time values to zero for both dates
+            obj.Next_Date_Object.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            return obj.Next_Date_Object < today;
+        });
+        renderTable(filteredData);
+    });
+
+    // Event listener for the "Today" button
+    var todayButton = document.querySelector('#todayButton');
+    todayButton.addEventListener('click', function () {
+        var today = new Date();
+        var filteredData = data.filter(function (obj) {
+            // Set time values to zero for both dates
+            obj.Next_Date_Object.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            return obj.Next_Date_Object.getTime() === today.getTime();
+        });
+        renderTable(filteredData);
+    });
+
 </script>
 </body>
 </html>
