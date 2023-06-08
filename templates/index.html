@@ -1,3 +1,4 @@
+<!--index.html-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -51,14 +52,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 10px 10px;
+            margin: 10px;
         }
 
         #searchInputs {
             display: flex;
-            flex-direction: row;
             gap: 8px;
-            justify-content: space-between;
             width: 100%;
         }
 
@@ -93,16 +92,46 @@
         #modifiedDate {
             font-family: Arial, Helvetica, sans-serif;
         }
+
+        #topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #04AA6D;
+            padding: 0px 10px;
+            color: white;
+        }
+
+        #prevButton,
+        #todayButton,
+        #loginButton {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
+<div id="topBar">
+    <div id="title">
+        <h4>Saurabh</h4>
+    </div>
+    <div id="buttons">
+        <button id="prevButton">Prev</button>
+        <button id="todayButton">Today</button>
+        <button id="loginButton">Login</button>
+    </div>
+</div>
 <div id="searchContainer">
     <div id="searchInputs">
         <input type="text" id="searchInput" placeholder="lpZ---">
         <input type="date" id="dateInput">
     </div>
     <button id="searchButton">Search</button>
-    <span id="modifiedDate"></span>
+    <span id="modifiedDate">{{ modified_date }}</span>
 </div>
 <div id="tableContainer">
     <table id="csvTable">
