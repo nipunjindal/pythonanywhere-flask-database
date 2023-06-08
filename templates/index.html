@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lawyer Diary</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <style>
+        @font-face {
+            font-family: 'krutidev10';
+            src: url('/static/krutidev10.ttf');
+        }
+
+        table {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 22px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-family: 'krutidev10', Arial, Helvetica, sans-serif;
+        }
+
+        th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Add a new class for the "Next Date" cells */
+        .no-font {
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 14px;
+        }
+
+        #tableContainer {
+            margin-top: 10px;
+        }
+
+        /* Style the search input elements to stack vertically */
+        #searchContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 10px;
+        }
+
+        #searchInputs {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #searchInput,
+        #dateInput,
+        #searchButton {
+            font-family: Arial, Helvetica, sans-serif;
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 18px;
+            border-radius: 4px;
+        }
+
+        #searchButton {
+            height: 40px;
+        }
+
+        /* Style the table to be full width */
+        #csvTable {
+            width: 100%;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+
+        #searchInput {
+            font-family: 'krutidev10', Arial, Helvetica, sans-serif;
+        }
+
+        #modifiedDate {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div id="searchContainer">
+    <div id="searchInputs">
+        <input type="text" id="searchInput" placeholder="lpZ---">
+        <input type="date" id="dateInput">
+    </div>
+    <button id="searchButton">Search</button>
+    <span id="modifiedDate"></span>
+</div>
+<div id="tableContainer">
+    <table id="csvTable">
+        <thead>
+        <tr>
+            <th colspan="3">dqy ekeys <span id="totalItemCount"></span></th>
+        </tr>
+        <tr>
+            <th>uacj</th>
+            <th>ikVhZ</th>
+            <th>usDLV MsV</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script>
+    var data = [];
+
+    // Parse the CSV data passed from Flask
+    var csvData = `{{ csv_data|safe }}`;
+    Papa.parse(csvData, {
+        header: true,
+        complete: function (results) {
+            data = results.data;
+            data.forEach(function (obj) {
+                obj.Next_Date_Object = new Date(obj.Next_Date);
+            });
+            data.sort(function (a, b) {
+                return b.Next_Date_Object - a.Next_Date_Object;
+            });
+            renderTable(data);
+        }
+    });
+
+    // Function to render table with given data
+    function renderTable(data, searchText = null) {
+        var tbody = document.querySelector('#csvTable tbody');
+        tbody.innerHTML = ''; // Clear previous rows
+
+        for (var i = 0; i < data.length; i++) {
+            var row = document.createElement('tr');
+            var osnNoCell = document.createElement('td');
+            osnNoCell.innerHTML = data[i]['OSN_NO'];
+            row.appendChild(osnNoCell);
+            var partyNameCell = document.createElement('td');
+            var partyName = data[i]['Party_Name'];
+            if (searchText && partyName.toLowerCase().indexOf(searchText) >= 0) {
+                // Highlight the search text
+                partyName = partyName.replace(new RegExp(searchText, 'gi'), function (match) {
+                    return '<span class="highlight">' + match + '</span>';
+                });
+            }
+            partyNameCell.innerHTML = partyName;
+            row.appendChild(partyNameCell);
+            var nextDateCell = document.createElement('td');
+            // Convert the date object to the desired format
+            var nextDate = data[i]['Next_Date_Object'];
+            nextDateCell.innerHTML = nextDate.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: '2-digit'
+            });
+            // Add the "no-font" class to the "Next Date" cells
+            nextDateCell.classList.add("no-font");
+            row.appendChild(nextDateCell);
+            tbody.appendChild(row);
+        }
+        document.getElementById("totalItemCount").innerHTML = data.length;
+    }
+
+    // Search button event listener
+    var searchButton = document.querySelector('#searchButton');
+    searchInput.addEventListener('keydown', function (event) {
+        if (event.keyCode === 13) { // Check if enter key was pressed
+            searchButton.click(); // Trigger search button's click event
+        }
+    });
+    searchButton.addEventListener('click', function () {
+        var searchInput = document.querySelector('#searchInput');
+        var searchText = searchInput.value.toLowerCase();
+        var dateInput = document.querySelector('#dateInput');
+        var selectedDate = dateInput.valueAsDate;
+        var filteredData = data.filter(function (obj) {
+            var values = Object.values(obj).join(' ').toLowerCase();
+            var dateMatch = true;
+            if (selectedDate) {
+                var nextDate = obj.Next_Date_Object;
+                // Set time values to zero for both dates
+                nextDate.setHours(0, 0, 0, 0);
+                selectedDate.setHours(0, 0, 0, 0);
+                dateMatch = nextDate.getTime() === selectedDate.getTime();
+            }
+            return values.includes(searchText) && dateMatch;
+        });
+        renderTable(filteredData, searchText); // Render table with filtered data
+    });
+</script>
+</body>
+</html>
