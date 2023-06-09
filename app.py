@@ -8,9 +8,12 @@ import pandas as pd
 app = Flask(__name__)
 
 
-def read_csv_data(csv_path='data/data.csv'):
+def read_csv_data(indexed=True, csv_path='data/data.csv'):
     # Read CSV data using Pandas
     data = pd.read_csv(csv_path)
+    if indexed:
+        data = data.reset_index()  # Add index column
+
     return data
 
 
@@ -32,7 +35,6 @@ def get_modified_date(csv_path='data/data.csv'):
 def index():
     # Read data from CSV file
     csv_data = read_csv_data()
-    csv_data = csv_data.reset_index()  # Add index column
 
     # Get last modified date of CSV file
     modified_date = get_modified_date()
@@ -42,7 +44,7 @@ def index():
 
 @app.route('/edit', methods=['POST'])
 def edit():
-    csv_data = read_csv_data()
+    csv_data = read_csv_data(indexed=False)
 
     # Retrieve the edited data from the request form
     row_index = int(request.form['editRowIndex'])
@@ -67,7 +69,14 @@ def edit():
     # Save the CSV data back to the file
     save_csv_data(csv_data)
 
-    return jsonify({'status': 'success'})
+    # Return the updated CSV data and modified date as JSON response
+    response_data = {
+        'status': 'success',
+        'csv_data': csv_data.to_dict(orient='records'),
+        'modified_date': get_modified_date()
+    }
+
+    return jsonify(response_data)
 
 
 if __name__ == '__main__':

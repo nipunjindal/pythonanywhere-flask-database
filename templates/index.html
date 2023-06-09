@@ -440,6 +440,18 @@
                 if (data.status === 'success') {
                     // Show a success message or perform any other action
                     console.log('Data updated successfully!');
+
+                    // Update the modified date
+                    const modifiedDateSpan = document.getElementById('modifiedDate');
+                    modifiedDateSpan.textContent = 'Data Update: ' + data.modified_date;
+
+                    // Update the CSV data and re-render the table
+                    data.csv_data.forEach(obj => {
+                        obj.Next_Date_Object = new Date(obj.Next_Date);
+                    });
+                    data.csv_data.sort((a, b) => b.Next_Date_Object - a.Next_Date_Object);
+                    renderTable(data.csv_data);
+
                 } else {
                     // Handle the error case
                     alert('Error occurred while updating data!');
