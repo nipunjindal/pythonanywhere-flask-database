@@ -489,7 +489,6 @@
     // Function to handle the form submission using AJAX
     function submitForm(event) {
         event.preventDefault(); // Prevent the default form submission
-        closeEditModal(); // Close the edit modal
 
         // Get the form data
         const formData = new FormData(event.target);
@@ -511,12 +510,15 @@
                     // Update the CSV data and re-render the table
                     globalData = prepareCSVData(responseData.csv_data)
                     renderTable();
+                    closeEditModal(); // Close the edit modal
                 } else {
+                    closeEditModal(); // Close the edit modal
                     // Handle the error case
                     alert('Error occurred while updating data!');
                 }
             })
             .catch(error => {
+                closeEditModal(); // Close the edit modal
                 console.error('Error:', error);
                 alert('An error occurred while updating data!');
             });
