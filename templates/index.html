@@ -258,7 +258,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <script>
-    let data = [];
+    let globalData = [];
 
     init();
 
@@ -268,8 +268,8 @@
         Papa.parse(csvData, {
             header: true,
             complete: function (results) {
-                data = prepareCSVData(results.data);
-                renderTable(data);
+                globalData = prepareCSVData(results.data);
+                renderTable(globalData);
             }
         });
 
@@ -298,9 +298,11 @@
         const editModalCancelButton = document.querySelector('#editModal .cancel');
         const editModalSubmitButton = document.getElementById('editForm');
 
-        function clearSearchInputs() {
-            searchInput.value = '';
-            dateInput.value = '';
+        function triggerFilter(pendingDates = false) {
+            const searchText = searchInput.value.toLowerCase();
+            const selectedDate = dateInput.valueAsDate;
+
+            renderTable(globalData, searchText, selectedDate, pendingDates); // Render table with filtered data
         }
 
         // Search button event listener
@@ -311,44 +313,19 @@
         });
 
         searchButton.addEventListener('click', function () {
-            const searchText = searchInput.value.toLowerCase();
-            const selectedDate = dateInput.valueAsDate;
-
-            const filteredData = data.filter(function (obj) {
-                const values = Object.values(obj).join(' ').toLowerCase();
-                let dateMatch = true;
-                if (selectedDate) {
-                    const nextDate = obj.Next_Date_Object;
-                    selectedDate.setHours(0, 0, 0, 0);
-                    dateMatch = nextDate.getTime() === selectedDate.getTime();
-                }
-                return values.includes(searchText) && dateMatch;
-            });
-            renderTable(filteredData, searchText); // Render table with filtered data
+            triggerFilter();
         });
 
         // Event listener for the "Prev" button
         pendingDatesButton.addEventListener('click', function () {
-            clearSearchInputs();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const filteredData = data.filter(function (obj) {
-                return obj.Next_Date_Object < today;
-            });
-            renderTable(filteredData);
+            dateInput.valueAsDate = new Date();
+            triggerFilter(true);
         });
 
         // Event listener for the "Today" button
         todayButton.addEventListener('click', function () {
-            clearSearchInputs();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const filteredData = data.filter(function (obj) {
-                return obj.Next_Date_Object.getTime() === today.getTime();
-            });
-            renderTable(filteredData);
+            dateInput.valueAsDate = new Date();
+            triggerFilter();
         });
 
         // Event listener for the "Create" button
@@ -364,8 +341,34 @@
     }
 
 
+    function filterData(data, searchText, dateInput, pendingDates) {
+        return data.filter(function (obj) {
+            let searchTextMatch = true;
+            if (searchText && searchText !== '') {
+                const values = Object.values(obj).join(' ').toLowerCase();
+                searchTextMatch = values.includes(searchText);
+            }
+
+            let dateMatch = true;
+            if (dateInput) {
+                dateInput.setHours(0, 0, 0, 0);
+                const nextDate = obj.Next_Date_Object;
+
+                if (pendingDates) {
+                    dateMatch = nextDate < dateInput;
+                } else {
+                    dateMatch = nextDate.getTime() === dateInput.getTime();
+                }
+            }
+
+            return searchTextMatch && dateMatch;
+        });
+    }
+
     // Function to render table with given data
-    function renderTable(data, searchText = null) {
+    function renderTable(data, searchText = null, dateInput = null, pendingDates = false) {
+        data = filterData(data, searchText, dateInput, pendingDates);
+
         const tbody = document.querySelector('#csvTable tbody');
         tbody.innerHTML = ''; // Clear previous rows
 
@@ -380,8 +383,16 @@
             row.appendChild(thinColCell);
 
             const osnNoCell = document.createElement('td');
-            osnNoCell.textContent = data[i]['OSN_NO'];
+            let osnNoName = data[i]['OSN_NO'];
+            if (searchText && osnNoName.toLowerCase().includes(searchText)) {
+                // Highlight the search text
+                osnNoName = osnNoName.replace(new RegExp(searchText, 'gi'), function (match) {
+                    return '<span class="highlight">' + match + '</span>';
+                });
+            }
+            osnNoCell.innerHTML = osnNoName;
             row.appendChild(osnNoCell);
+
             const partyNameCell = document.createElement('td');
             let partyName = data[i]['Party_Name'];
             if (searchText && partyName.toLowerCase().includes(searchText)) {
@@ -471,8 +482,8 @@
                     updateModifiedDate(responseData.modified_date);
 
                     // Update the CSV data and re-render the table
-                    data = prepareCSVData(responseData.csv_data)
-                    renderTable(data);
+                    globalData = prepareCSVData(responseData.csv_data)
+                    renderTable(globalData);
                 } else {
                     // Handle the error case
                     alert('Error occurred while updating data!');
