@@ -100,7 +100,7 @@
             color: white;
         }
 
-        #prevButton,
+        #pendingDatesButton,
         #todayButton,
         #createButton {
             font-size: 18px;
@@ -199,7 +199,7 @@
         <h4>Saurabh</h4>
     </div>
     <div id="buttons">
-        <button id="prevButton">Prev</button>
+        <button id="pendingDatesButton">Move</button>
         <button id="todayButton">Today</button>
         <button id="createButton">Create</button>
     </div>
@@ -292,7 +292,7 @@
         const searchButton = document.querySelector('#searchButton');
         const searchInput = document.querySelector('#searchInput');
         const dateInput = document.querySelector('#dateInput');
-        const prevButton = document.querySelector('#prevButton');
+        const pendingDatesButton = document.querySelector('#pendingDatesButton');
         const todayButton = document.querySelector('#todayButton');
         const createButton = document.querySelector('#createButton');
         const editModalCancelButton = document.querySelector('#editModal .cancel');
@@ -328,7 +328,7 @@
         });
 
         // Event listener for the "Prev" button
-        prevButton.addEventListener('click', function () {
+        pendingDatesButton.addEventListener('click', function () {
             clearSearchInputs();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
