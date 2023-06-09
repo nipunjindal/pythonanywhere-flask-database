@@ -260,21 +260,109 @@
 <script>
     let data = [];
 
-    // Parse the CSV data passed from Flask
-    const csvData = `{{ csv_data.to_csv(index=false) | safe }}`;
-    Papa.parse(csvData, {
-        header: true,
-        complete: function (results) {
-            data = results.data;
-            data.forEach(function (obj) {
-                obj.Next_Date_Object = new Date(obj.Next_Date);
-            });
-            data.sort(function (a, b) {
-                return b.Next_Date_Object - a.Next_Date_Object;
-            });
-            renderTable(data);
+    init();
+
+    function init() {
+        // Parse the CSV data passed from Flask
+        const csvData = `{{ csv_data.to_csv(index=false) | safe }}`;
+        Papa.parse(csvData, {
+            header: true,
+            complete: function (results) {
+                data = prepareCSVData(results.data);
+                renderTable(data);
+            }
+        });
+
+        // Add event listeners
+        attachEventListeners();
+    }
+
+    function prepareCSVData(data) {
+        data.forEach(function (obj) {
+            obj.Next_Date_Object = new Date(obj.Next_Date);
+            obj.Next_Date_Object.setHours(0, 0, 0, 0);
+        });
+        data.sort(function (a, b) {
+            return b.Next_Date_Object - a.Next_Date_Object;
+        });
+        return data;
+    }
+
+    function attachEventListeners() {
+        const searchButton = document.querySelector('#searchButton');
+        const searchInput = document.querySelector('#searchInput');
+        const dateInput = document.querySelector('#dateInput');
+        const prevButton = document.querySelector('#prevButton');
+        const todayButton = document.querySelector('#todayButton');
+        const createButton = document.querySelector('#createButton');
+        const editModalCancelButton = document.querySelector('#editModal .cancel');
+        const editModalSubmitButton = document.getElementById('editForm');
+
+        function clearSearchInputs() {
+            searchInput.value = '';
+            dateInput.value = '';
         }
-    });
+
+        // Search button event listener
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.keyCode === 13) { // Check if enter key was pressed
+                searchButton.click(); // Trigger search button's click event
+            }
+        });
+
+        searchButton.addEventListener('click', function () {
+            const searchText = searchInput.value.toLowerCase();
+            const selectedDate = dateInput.valueAsDate;
+
+            const filteredData = data.filter(function (obj) {
+                const values = Object.values(obj).join(' ').toLowerCase();
+                let dateMatch = true;
+                if (selectedDate) {
+                    const nextDate = obj.Next_Date_Object;
+                    selectedDate.setHours(0, 0, 0, 0);
+                    dateMatch = nextDate.getTime() === selectedDate.getTime();
+                }
+                return values.includes(searchText) && dateMatch;
+            });
+            renderTable(filteredData, searchText); // Render table with filtered data
+        });
+
+        // Event listener for the "Prev" button
+        prevButton.addEventListener('click', function () {
+            clearSearchInputs();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const filteredData = data.filter(function (obj) {
+                return obj.Next_Date_Object < today;
+            });
+            renderTable(filteredData);
+        });
+
+        // Event listener for the "Today" button
+        todayButton.addEventListener('click', function () {
+            clearSearchInputs();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const filteredData = data.filter(function (obj) {
+                return obj.Next_Date_Object.getTime() === today.getTime();
+            });
+            renderTable(filteredData);
+        });
+
+        // Event listener for the "Create" button
+        createButton.addEventListener('click', function () {
+            openEditModal(null);
+        });
+
+        // Event listener for the cancel button in the edit modal
+        editModalCancelButton.addEventListener('click', closeEditModal);
+
+        // Add event listener to the form
+        editModalSubmitButton.addEventListener('submit', submitForm);
+    }
+
 
     // Function to render table with given data
     function renderTable(data, searchText = null) {
@@ -320,59 +408,6 @@
         document.getElementById("totalItemCount").textContent = data.length;
     }
 
-    // Search button event listener
-    const searchButton = document.querySelector('#searchButton');
-    const searchInput = document.querySelector('#searchInput');
-    const dateInput = document.querySelector('#dateInput');
-    searchInput.addEventListener('keydown', function (event) {
-        if (event.keyCode === 13) { // Check if enter key was pressed
-            searchButton.click(); // Trigger search button's click event
-        }
-    });
-    searchButton.addEventListener('click', function () {
-        const searchText = searchInput.value.toLowerCase();
-        const selectedDate = dateInput.valueAsDate;
-        const filteredData = data.filter(function (obj) {
-            const values = Object.values(obj).join(' ').toLowerCase();
-            let dateMatch = true;
-            if (selectedDate) {
-                const nextDate = obj.Next_Date_Object;
-                // Set time values to zero for both dates
-                nextDate.setHours(0, 0, 0, 0);
-                selectedDate.setHours(0, 0, 0, 0);
-                dateMatch = nextDate.getTime() === selectedDate.getTime();
-            }
-            return values.includes(searchText) && dateMatch;
-        });
-        renderTable(filteredData, searchText); // Render table with filtered data
-    });
-
-    // Event listener for the "Prev" button
-    const prevButton = document.querySelector('#prevButton');
-    prevButton.addEventListener('click', function () {
-        const today = new Date();
-        const filteredData = data.filter(function (obj) {
-            // Set time values to zero for both dates
-            obj.Next_Date_Object.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            return obj.Next_Date_Object < today;
-        });
-        renderTable(filteredData);
-    });
-
-    // Event listener for the "Today" button
-    const todayButton = document.querySelector('#todayButton');
-    todayButton.addEventListener('click', function () {
-        const today = new Date();
-        const filteredData = data.filter(function (obj) {
-            // Set time values to zero for both dates
-            obj.Next_Date_Object.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            return obj.Next_Date_Object.getTime() === today.getTime();
-        });
-        renderTable(filteredData);
-    });
-
     function openEditModal(row) {
         const editForm = document.getElementById('editForm');
         const editRowIndexInput = document.getElementById('editRowIndex');
@@ -413,15 +448,6 @@
         document.getElementById('editOverlay').style.display = 'none';
     }
 
-    // Event listener for the cancel button in the edit modal
-    const cancelButton = document.querySelector('#editModal .cancel');
-    cancelButton.addEventListener('click', closeEditModal);
-
-    const createButton = document.querySelector('#createButton');
-    createButton.addEventListener('click', function () {
-        openEditModal(null);
-    });
-
     // Function to handle the form submission using AJAX
     function submitForm(event) {
         event.preventDefault(); // Prevent the default form submission
@@ -436,22 +462,17 @@
             body: formData
         })
             .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
+            .then(responseData => {
+                if (responseData.status === 'success') {
                     // Show a success message or perform any other action
                     console.log('Data updated successfully!');
 
                     // Update the modified date
-                    const modifiedDateSpan = document.getElementById('modifiedDate');
-                    modifiedDateSpan.textContent = 'Data Update: ' + data.modified_date;
+                    updateModifiedDate(responseData.modified_date);
 
                     // Update the CSV data and re-render the table
-                    data.csv_data.forEach(obj => {
-                        obj.Next_Date_Object = new Date(obj.Next_Date);
-                    });
-                    data.csv_data.sort((a, b) => b.Next_Date_Object - a.Next_Date_Object);
-                    renderTable(data.csv_data);
-
+                    data = prepareCSVData(responseData.csv_data)
+                    renderTable(data);
                 } else {
                     // Handle the error case
                     alert('Error occurred while updating data!');
@@ -463,9 +484,10 @@
             });
     }
 
-    // Add event listener to the form
-    const editForm = document.getElementById('editForm');
-    editForm.addEventListener('submit', submitForm);
+    function updateModifiedDate(date) {
+        const modifiedDateSpan = document.getElementById('modifiedDate');
+        modifiedDateSpan.textContent = 'Data Update: ' + date;
+    }
 
 </script>
 </body>
