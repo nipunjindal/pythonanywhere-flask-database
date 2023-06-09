@@ -368,6 +368,7 @@
 
                 if (pendingDates) {
                     dateMatch = nextDate < dateInput;
+                    dateMatch = dateMatch && obj['Work_Done'] === '';
                 } else {
                     dateMatch = nextDate.getTime() === dateInput.getTime();
                 }
