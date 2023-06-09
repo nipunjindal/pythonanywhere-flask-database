@@ -181,6 +181,15 @@
             margin-left: 10px;
         }
 
+        .thin-col {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .thin-col:hover {
+            background-color: #04835e;
+        }
+
     </style>
 </head>
 <body>
@@ -233,9 +242,10 @@
     <table id="csvTable">
         <thead>
         <tr>
-            <th colspan="3">dqy ekeys <span id="totalItemCount"></span></th>
+            <th colspan="4">dqy ekeys <span id="totalItemCount"></span></th>
         </tr>
         <tr>
+            <th class="thin-col"></th>
             <th>uacj</th>
             <th>ikVhZ</th>
             <th>usDLV MsV</th>
@@ -273,6 +283,13 @@
         for (let i = 0; i < data.length; i++) {
             const row = document.createElement('tr');
             row.id = data[i]['index'];
+            const thinColCell = document.createElement('td');
+            thinColCell.classList.add('thin-col');
+            thinColCell.addEventListener('click', function () {
+                openEditModal(row);
+            });
+            row.appendChild(thinColCell);
+
             const osnNoCell = document.createElement('td');
             osnNoCell.textContent = data[i]['OSN_NO'];
             row.appendChild(osnNoCell);
@@ -364,11 +381,11 @@
 
         // Set the form values
         editRowIndexInput.value = row.id;
-        editOSNNoInput.value = row.cells[0].textContent;
-        editPartyNameInput.value = row.cells[1].textContent;
+        editOSNNoInput.value = row.cells[1].textContent;
+        editPartyNameInput.value = row.cells[2].textContent;
 
         // Convert the date to the desired format (YYYY-MM-DD)
-        const nextDate = row.cells[2].textContent;
+        const nextDate = row.cells[3].textContent;
         const dateObj = new Date(nextDate);
         const year = dateObj.getFullYear();
         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -384,13 +401,6 @@
     function closeEditModal() {
         document.getElementById('editOverlay').style.display = 'none';
     }
-
-    // Event listener for double-clicking on a row
-    const table = document.getElementById('csvTable');
-    table.addEventListener('dblclick', function (event) {
-        const row = event.target.parentNode;
-        openEditModal(row);
-    });
 
     // Event listener for the cancel button in the edit modal
     const cancelButton = document.querySelector('#editModal .cancel');
