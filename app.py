@@ -3,13 +3,15 @@ import os
 from flask import Flask, render_template
 import datetime
 import pytz
+import pandas as pd
 
 app = Flask(__name__)
 
 
 def read_csv_data(csv_path):
-    with open(csv_path, 'r') as file:
-        csv_data = file.read()
+    # Read CSV data using Pandas
+    csv_data = pd.read_csv(csv_path)
+    csv_data = csv_data.reset_index()  # Add index column
     return csv_data
 
 

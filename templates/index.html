@@ -151,7 +151,7 @@
     let data = [];
 
     // Parse the CSV data passed from Flask
-    const csvData = `{{ csv_data|safe }}`;
+    const csvData = `{{ csv_data.to_csv(index=false) | safe }}`;
     Papa.parse(csvData, {
         header: true,
         complete: function (results) {
@@ -173,6 +173,7 @@
 
         for (let i = 0; i < data.length; i++) {
             const row = document.createElement('tr');
+            row.id = data[i]['index'];
             const osnNoCell = document.createElement('td');
             osnNoCell.textContent = data[i]['OSN_NO'];
             row.appendChild(osnNoCell);
