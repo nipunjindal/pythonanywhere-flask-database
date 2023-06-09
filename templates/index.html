@@ -194,6 +194,29 @@
             font-family: 'krutidev10', Arial, Helvetica, sans-serif;
         }
 
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            border-top-color: #04AA6D;
+            animation: spin 1s infinite linear;
+            margin: 0px;
+        }
+
+        .loading .save-text {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -238,7 +261,10 @@
                 <input type="checkbox" name="editWorkDone" id="editWorkDone" value="dk;Z #dk">
             </div>
             <div class="button-group">
-                <button type="submit">Save</button>
+                <button id="editModalSaveButton" type="submit">
+                    <span class="save-text">Save</span>
+                    <span class="spinner"></span>
+                </button>
                 <button type="button" class="cancel">Cancel</button>
             </div>
         </form>
@@ -483,12 +509,27 @@
 
     // Function to close the edit modal
     function closeEditModal() {
+        hideSaveSpinner();
         document.getElementById('editOverlay').style.display = 'none';
+    }
+
+    function showSaveSpinner() {
+        const saveButton = document.getElementById('editModalSaveButton');
+        saveButton.classList.add('loading');
+        saveButton.disabled = true;
+    }
+
+    // Function to hide the spinner and enable the save button
+    function hideSaveSpinner() {
+        const saveButton = document.getElementById('editModalSaveButton');
+        saveButton.classList.remove('loading');
+        saveButton.disabled = false;
     }
 
     // Function to handle the form submission using AJAX
     function submitForm(event) {
         event.preventDefault(); // Prevent the default form submission
+        showSaveSpinner();
 
         // Get the form data
         const formData = new FormData(event.target);
