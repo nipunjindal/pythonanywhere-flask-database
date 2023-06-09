@@ -259,6 +259,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <script>
     let globalData = [];
+    let globalSearchTerm = null;
+    let globalSearchDate = null;
+    let globalPreviousDates = false;
 
     init();
 
@@ -299,10 +302,11 @@
         const editModalSubmitButton = document.getElementById('editForm');
 
         function triggerFilter(pendingDates = false) {
-            const searchText = searchInput.value.toLowerCase();
-            const selectedDate = dateInput.valueAsDate;
+            globalSearchTerm = searchInput.value.toLowerCase();
+            globalSearchDate = dateInput.valueAsDate;
+            globalPreviousDates = pendingDates;
 
-            renderTable(globalData, searchText, selectedDate, pendingDates); // Render table with filtered data
+            renderTable(); // Render table with filtered data
         }
 
         // Search button event listener
@@ -366,7 +370,7 @@
     }
 
     // Function to render table with given data
-    function renderTable(data, searchText = null, dateInput = null, pendingDates = false) {
+    function renderTable(data = globalData, searchText = globalSearchTerm, dateInput = globalSearchDate, pendingDates = globalPreviousDates) {
         data = filterData(data, searchText, dateInput, pendingDates);
 
         const tbody = document.querySelector('#csvTable tbody');
@@ -483,7 +487,7 @@
 
                     // Update the CSV data and re-render the table
                     globalData = prepareCSVData(responseData.csv_data)
-                    renderTable(globalData);
+                    renderTable();
                 } else {
                     // Handle the error case
                     alert('Error occurred while updating data!');

@@ -8,12 +8,9 @@ import pandas as pd
 app = Flask(__name__)
 
 
-def read_csv_data(indexed=True, csv_path='data/data.csv'):
+def read_csv_data(csv_path='data/data.csv'):
     # Read CSV data using Pandas
     data = pd.read_csv(csv_path)
-    if indexed:
-        data = data.reset_index()  # Add index column
-
     return data
 
 
@@ -44,7 +41,7 @@ def index():
 
 @app.route('/edit', methods=['POST'])
 def edit():
-    csv_data = read_csv_data(indexed=False)
+    csv_data = read_csv_data()
 
     # Retrieve the edited data from the request form
     row_index = int(request.form['editRowIndex'])
@@ -58,8 +55,9 @@ def edit():
 
     if row_index == -1:
         # Create a new row in the CSV data
-        new_row = pd.DataFrame({'OSN_NO': [osn_no], 'Party_Name': [party_name], 'Next_Date': [formatted_next_date]})
-        csv_data = pd.concat([csv_data, new_row], ignore_index=True)
+        new_row = pd.DataFrame({'index': csv_data.index.max() + 1, 'OSN_NO': [osn_no], 'Party_Name': [party_name],
+                                'Next_Date': [formatted_next_date]})
+        csv_data = pd.concat([csv_data, new_row])
     else:
         # Update the corresponding row in the CSV data
         csv_data.loc[row_index, 'OSN_NO'] = osn_no
