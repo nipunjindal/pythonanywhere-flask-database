@@ -109,6 +109,78 @@
             cursor: pointer;
         }
 
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            font-family: 'krutidev10', Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 222px;
+            width: 100%;
+        }
+
+        .modal h2 {
+            margin-top: 0;
+        }
+
+        .modal form div {
+            margin-bottom: 14px;
+        }
+
+        .modal label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+
+        .modal input[type="text"] {
+            font-family: 'krutidev10', Arial, Helvetica, sans-serif;
+
+        }
+
+        .modal input[type="text"],
+        .modal input[type="date"] {
+            font-size: 18px;
+            width: 200px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .modal form div.button-group {
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal button {
+            padding: 8px 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+
+        .modal button.cancel {
+            background-color: #f44336;
+            margin-left: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -130,6 +202,33 @@
     <button id="searchButton">Search</button>
     <span id="modifiedDate">Data Update: {{ modified_date }}</span>
 </div>
+
+<!-- Modal for editing row -->
+<div class="overlay" id="editOverlay">
+    <div class="modal" id="editModal">
+        <form id="editForm" action="/edit" method="POST">
+            <input type="hidden" name="editRowIndex" id="editRowIndex">
+            <div>
+                <label for="editOSNNo">uacj</label>
+                <input type="text" name="editOSNNo" id="editOSNNo" required>
+            </div>
+            <div>
+                <label for="editPartyName">ikVhZ</label>
+                <input type="text" name="editPartyName" id="editPartyName" required>
+            </div>
+            <div>
+                <label for="editNextDate">usDLV MsV</label>
+                <input type="date" name="editNextDate" id="editNextDate" required>
+            </div>
+            <div class="button-group">
+                <button type="submit">Save</button>
+                <button type="button" class="cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <div id="tableContainer">
     <table id="csvTable">
         <thead>
@@ -255,6 +354,47 @@
         });
         renderTable(filteredData);
     });
+
+    function openEditModal(row) {
+        const editForm = document.getElementById('editForm');
+        const editRowIndexInput = document.getElementById('editRowIndex');
+        const editOSNNoInput = document.getElementById('editOSNNo');
+        const editPartyNameInput = document.getElementById('editPartyName');
+        const editNextDateInput = document.getElementById('editNextDate');
+
+        // Set the form values
+        editRowIndexInput.value = row.id;
+        editOSNNoInput.value = row.cells[0].textContent;
+        editPartyNameInput.value = row.cells[1].textContent;
+
+        // Convert the date to the desired format (YYYY-MM-DD)
+        const nextDate = row.cells[2].textContent;
+        const dateObj = new Date(nextDate);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        editNextDateInput.value = formattedDate;
+
+        // Show the overlay and edit modal
+        document.getElementById('editOverlay').style.display = 'flex';
+    }
+
+    // Function to close the edit modal
+    function closeEditModal() {
+        document.getElementById('editOverlay').style.display = 'none';
+    }
+
+    // Event listener for double-clicking on a row
+    const table = document.getElementById('csvTable');
+    table.addEventListener('dblclick', function (event) {
+        const row = event.target.parentNode;
+        openEditModal(row);
+    });
+
+    // Event listener for the cancel button in the edit modal
+    const cancelButton = document.querySelector('#editModal .cancel');
+    cancelButton.addEventListener('click', closeEditModal);
 
 </script>
 </body>
