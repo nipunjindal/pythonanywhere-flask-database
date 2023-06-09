@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 def read_csv_data(csv_path='data/data.csv'):
     # Read CSV data using Pandas
-    data = pd.read_csv(csv_path)
+    data = pd.read_csv(csv_path, keep_default_na=False)
     return data
 
 
@@ -48,6 +48,7 @@ def edit():
     osn_no = request.form['editOSNNo']
     party_name = request.form['editPartyName']
     next_date = request.form['editNextDate']
+    work_done = request.form.get('editWorkDone', '')
 
     # Convert the next date to the desired format (MM/DD/YY)
     datetime_obj = datetime.datetime.strptime(next_date, "%Y-%m-%d")
@@ -55,14 +56,20 @@ def edit():
 
     if row_index == -1:
         # Create a new row in the CSV data
-        new_row = pd.DataFrame({'index': csv_data.index.max() + 1, 'OSN_NO': [osn_no], 'Party_Name': [party_name],
-                                'Next_Date': [formatted_next_date]})
+        new_row = pd.DataFrame({
+            'index': csv_data.index.max() + 1,
+            'OSN_NO': [osn_no],
+            'Party_Name': [party_name],
+            'Next_Date': [formatted_next_date],
+            'Work_Done': [work_done]
+        })
         csv_data = pd.concat([csv_data, new_row])
     else:
         # Update the corresponding row in the CSV data
         csv_data.loc[row_index, 'OSN_NO'] = osn_no
         csv_data.loc[row_index, 'Party_Name'] = party_name
         csv_data.loc[row_index, 'Next_Date'] = formatted_next_date
+        csv_data.loc[row_index, 'Work_Done'] = work_done
 
     # Save the CSV data back to the file
     save_csv_data(csv_data)

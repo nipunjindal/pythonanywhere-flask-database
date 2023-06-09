@@ -148,7 +148,6 @@
 
         .modal input[type="text"] {
             font-family: 'krutidev10', Arial, Helvetica, sans-serif;
-
         }
 
         .modal input[type="text"],
@@ -191,6 +190,10 @@
             background-color: #04835e;
         }
 
+        #editWorkDone {
+            font-family: 'krutidev10', Arial, Helvetica, sans-serif;
+        }
+
     </style>
 </head>
 <body>
@@ -230,6 +233,10 @@
                 <label for="editNextDate">usDLV MsV</label>
                 <input type="date" name="editNextDate" id="editNextDate" required>
             </div>
+            <div>
+                <label for="editWorkDone">dk;Z #dk</label>
+                <input type="checkbox" name="editWorkDone" id="editWorkDone" value="dk;Z #dk">
+            </div>
             <div class="button-group">
                 <button type="submit">Save</button>
                 <button type="button" class="cancel">Cancel</button>
@@ -243,13 +250,14 @@
     <table id="csvTable">
         <thead>
         <tr>
-            <th colspan="4">dqy ekeys <span id="totalItemCount"></span></th>
+            <th colspan="5">dqy ekeys <span id="totalItemCount"></span></th>
         </tr>
         <tr>
             <th class="thin-col"></th>
             <th>uacj</th>
             <th>ikVhZ</th>
             <th>usDLV MsV</th>
+            <th>dk;Z</th>
         </tr>
         </thead>
         <tbody>
@@ -365,7 +373,12 @@
                 }
             }
 
-            return searchTextMatch && dateMatch;
+            let validIndex = true;
+            if (obj.index === '') {
+                validIndex = false;
+            }
+
+            return searchTextMatch && dateMatch && validIndex;
         });
     }
 
@@ -407,6 +420,7 @@
             }
             partyNameCell.innerHTML = partyName;
             row.appendChild(partyNameCell);
+
             const nextDateCell = document.createElement('td');
             // Convert the date object to the desired format
             const nextDate = data[i]['Next_Date_Object'];
@@ -418,6 +432,11 @@
             // Add the "no-font" class to the "Next Date" cells
             nextDateCell.classList.add("no-font");
             row.appendChild(nextDateCell);
+
+            const workDoneCell = document.createElement('td');
+            workDoneCell.textContent = data[i]['Work_Done'];
+            row.appendChild(workDoneCell);
+
             tbody.appendChild(row);
         }
         document.getElementById("totalItemCount").textContent = data.length;
@@ -429,6 +448,7 @@
         const editOSNNoInput = document.getElementById('editOSNNo');
         const editPartyNameInput = document.getElementById('editPartyName');
         const editNextDateInput = document.getElementById('editNextDate');
+        const editWorkDoneSelect = document.getElementById('editWorkDone');
 
         // Clear the form inputs
         editForm.reset();
@@ -448,6 +468,8 @@
             const formattedDate = `${year}-${month}-${day}`;
             editNextDateInput.value = formattedDate;
 
+            // Set the selected value for the dropdown
+            editWorkDoneSelect.checked = row.cells[4].textContent === 'dk;Z #dk';
         } else {
             // Clear the hidden row index input value
             editRowIndexInput.value = -1;
