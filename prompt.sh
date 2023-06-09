@@ -19,3 +19,10 @@ echo ""
 echo "'''"
 cat templates/index.html
 echo "'''"
+
+echo ""
+
+echo "'''"
+echo "#data/data.csv"
+head -n 3 data/data.csv
+echo "'''"
