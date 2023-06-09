@@ -54,10 +54,15 @@ def edit():
     datetime_obj = datetime.datetime.strptime(next_date, "%Y-%m-%d")
     formatted_next_date = datetime_obj.strftime("%m/%d/%y 00:00:00")
 
-    # Update the corresponding row in the CSV data
-    csv_data.loc[row_index, 'OSN_NO'] = osn_no
-    csv_data.loc[row_index, 'Party_Name'] = party_name
-    csv_data.loc[row_index, 'Next_Date'] = formatted_next_date
+    if row_index == -1:
+        # Update the corresponding row in the CSV data
+        csv_data.loc[row_index, 'OSN_NO'] = osn_no
+        csv_data.loc[row_index, 'Party_Name'] = party_name
+        csv_data.loc[row_index, 'Next_Date'] = formatted_next_date
+    else:
+        # Create a new row in the CSV data
+        new_row = {'OSN_NO': osn_no, 'Party_Name': party_name, 'Next_Date': formatted_next_date}
+        csv_data = csv_data.append(new_row, ignore_index=True)
 
     # Save the CSV data back to the file
     save_csv_data(csv_data)

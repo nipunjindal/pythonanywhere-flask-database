@@ -379,22 +379,23 @@
         const editPartyNameInput = document.getElementById('editPartyName');
         const editNextDateInput = document.getElementById('editNextDate');
 
-        // Set the form values
-        editRowIndexInput.value = row.id;
-        editOSNNoInput.value = row.cells[1].textContent;
-        editPartyNameInput.value = row.cells[2].textContent;
+        // Clear the form inputs
+        editForm.reset();
 
-        // Convert the date to the desired format (YYYY-MM-DD)
-        const nextDate = row.cells[3].textContent;
-        const dateObj = new Date(nextDate);
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
-        editNextDateInput.value = formattedDate;
+        if (row !== null) {
+            // Update the form inputs with the row data
+            editRowIndexInput.value = row.id;
+            editOSNNoInput.value = row.cells[1].textContent;
+            editPartyNameInput.value = row.cells[2].textContent;
+            editNextDateInput.value = row.cells[3].textContent;
+        } else {
+            // Clear the hidden row index input value
+            editRowIndexInput.value = -1;
+        }
 
-        // Show the overlay and edit modal
-        document.getElementById('editOverlay').style.display = 'flex';
+        // Show the edit modal
+        const editOverlay = document.getElementById('editOverlay');
+        editOverlay.style.display = 'flex';
     }
 
     // Function to close the edit modal
@@ -405,6 +406,11 @@
     // Event listener for the cancel button in the edit modal
     const cancelButton = document.querySelector('#editModal .cancel');
     cancelButton.addEventListener('click', closeEditModal);
+
+    const createButton = document.querySelector('#createButton');
+    createButton.addEventListener('click', function () {
+        openEditModal(null);
+    });
 
 </script>
 </body>
