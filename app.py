@@ -51,7 +51,7 @@ def edit():
     global csv_data
 
     # Retrieve the edited data from the request form
-    row_index = int(request.form['row_index'])
+    row_index = int(request.form['editRowIndex'])
     osn_no = request.form['editOSNNo']
     party_name = request.form['editPartyName']
     next_date = request.form['editNextDate']
