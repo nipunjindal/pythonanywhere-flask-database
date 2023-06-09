@@ -184,6 +184,7 @@
         .thin-col {
             cursor: pointer;
             transition: background-color 0.3s ease;
+            width: 10px;
         }
 
         .thin-col:hover {
@@ -387,7 +388,16 @@
             editRowIndexInput.value = row.id;
             editOSNNoInput.value = row.cells[1].textContent;
             editPartyNameInput.value = row.cells[2].textContent;
-            editNextDateInput.value = row.cells[3].textContent;
+
+            // Convert the date to the desired format (YYYY-MM-DD)
+            const nextDate = row.cells[3].textContent;
+            const dateObj = new Date(nextDate);
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            editNextDateInput.value = formattedDate;
+
         } else {
             // Clear the hidden row index input value
             editRowIndexInput.value = -1;
@@ -411,6 +421,39 @@
     createButton.addEventListener('click', function () {
         openEditModal(null);
     });
+
+    // Function to handle the form submission using AJAX
+    function submitForm(event) {
+        event.preventDefault(); // Prevent the default form submission
+        closeEditModal(); // Close the edit modal
+
+        // Get the form data
+        const formData = new FormData(event.target);
+
+        // Make an AJAX request to the server
+        fetch('/edit', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show a success message or perform any other action
+                    console.log('Data updated successfully!');
+                } else {
+                    // Handle the error case
+                    alert('Error occurred while updating data!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating data!');
+            });
+    }
+
+    // Add event listener to the form
+    const editForm = document.getElementById('editForm');
+    editForm.addEventListener('submit', submitForm);
 
 </script>
 </body>
