@@ -223,6 +223,15 @@
             color: white;
         }
 
+        #refreshButton {
+            height: 40px;
+            font-size: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px;
+            transform: rotate(180deg);
+        }
+
     </style>
 </head>
 <body>
@@ -231,6 +240,7 @@
         <h4>Saurabh</h4>
     </div>
     <div id="buttons">
+        <button id="refreshButton">&#x21bb;</button>
         <button id="pendingDatesButton">Move</button>
         <button id="todayButton">Today</button>
         <button id="createButton">Create</button>
@@ -337,6 +347,7 @@
         const dateInput = document.querySelector('#dateInput');
         const pendingDatesButton = document.querySelector('#pendingDatesButton');
         const todayButton = document.querySelector('#todayButton');
+        const refreshButton = document.querySelector('#refreshButton');
         const createButton = document.querySelector('#createButton');
         const editModalCancelButton = document.querySelector('#editModal .cancel');
         const editModalSubmitButton = document.getElementById('editForm');
@@ -391,6 +402,11 @@
         createButton.addEventListener('click', function () {
             createButton.classList.add('active');
             openEditModal(null);
+        });
+
+        refreshButton.addEventListener('click', function () {
+            refreshButton.classList.add('active');
+            window.location.reload();
         });
 
         // Event listener for the cancel button in the edit modal
