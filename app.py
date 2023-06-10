@@ -7,11 +7,20 @@ import pandas as pd
 
 app = Flask(__name__)
 
+# Global variable for storing the CSV data
+csv_data = None
+
 
 def read_csv_data(csv_path='data/data.csv'):
-    # Read CSV data using Pandas
-    data = pd.read_csv(csv_path, keep_default_na=False)
-    return data
+    global csv_data
+
+    # Read CSV data from memory if it is already loaded
+    if csv_data is not None:
+        return csv_data
+
+    # Read CSV data from disk
+    csv_data = pd.read_csv(csv_path, keep_default_na=False)
+    return csv_data
 
 
 def save_csv_data(csv_data, csv_path='data/data.csv'):
@@ -41,7 +50,7 @@ def index():
 
 @app.route('/edit', methods=['POST'])
 def edit():
-    csv_data = read_csv_data()
+    global csv_data
 
     # Retrieve the edited data from the request form
     row_index = int(request.form['editRowIndex'])
