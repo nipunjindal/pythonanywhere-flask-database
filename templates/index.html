@@ -233,6 +233,11 @@
             transform: rotate(180deg);
         }
 
+        .case-closed {
+            background-color: lightcoral;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -293,14 +298,13 @@
     <table id="csvTable">
         <thead>
         <tr>
-            <th colspan="5">dqy ekeys <span id="totalItemCount"></span></th>
+            <th colspan="4">dqy ekeys <span id="totalItemCount"></span></th>
         </tr>
         <tr>
             <th class="thin-col"></th>
             <th>uacj</th>
             <th>ikVhZ</th>
             <th>usDLV MsV</th>
-            <th>dk;Z</th>
         </tr>
         </thead>
         <tbody>
@@ -363,7 +367,7 @@
                 todayButton.classList.remove('active');
             } else {
                 pendingDatesButton.classList.remove('active');
-                if (globalSearchDate.getDate() === today().getDate()) {
+                if (globalSearchDate && globalSearchDate.getDate() === today().getDate()) {
                     todayButton.classList.add('active');
                 }
             }
@@ -499,9 +503,11 @@
             nextDateCell.classList.add("no-font");
             row.appendChild(nextDateCell);
 
-            const workDoneCell = document.createElement('td');
-            workDoneCell.textContent = data[i]['Work_Done'];
-            row.appendChild(workDoneCell);
+            // const workDoneCell = document.createElement('td');
+            row.workDone = data[i]['Work_Done'];
+            if (row.workDone === 'dk;Z #dk') {
+                row.classList.add('case-closed');
+            }
 
             tbody.appendChild(row);
         }
@@ -535,7 +541,7 @@
             editNextDateInput.value = formattedDate;
 
             // Set the selected value for the dropdown
-            editWorkDoneSelect.checked = row.cells[4].textContent === 'dk;Z #dk';
+            editWorkDoneSelect.checked = row.workDone === 'dk;Z #dk';
         } else {
             // Clear the hidden row index input value
             editRowIndexInput.value = -1;
