@@ -211,12 +211,18 @@
             border: 2px solid #fff;
             border-top-color: #04AA6D;
             animation: spin 1s infinite linear;
-            margin: 0px;
+            margin: 0;
         }
 
         .loading .save-text {
             display: none;
         }
+
+        .active {
+            background-color: #04AA6D;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -340,7 +346,22 @@
             globalSearchDate = dateInput.valueAsDate;
             globalPreviousDates = pendingDates;
 
+            if (globalPreviousDates) {
+                pendingDatesButton.classList.add('active');
+                todayButton.classList.remove('active');
+            } else {
+                pendingDatesButton.classList.remove('active');
+                if (globalSearchDate.getDate() === today().getDate()) {
+                    todayButton.classList.add('active');
+                }
+            }
+
             renderTable(); // Render table with filtered data
+        }
+
+        function today() {
+            const today = new Date();
+            return today;
         }
 
         // Search button event listener
@@ -356,18 +377,19 @@
 
         // Event listener for the "Prev" button
         pendingDatesButton.addEventListener('click', function () {
-            dateInput.valueAsDate = new Date();
+            dateInput.valueAsDate = today();
             triggerFilter(true);
         });
 
         // Event listener for the "Today" button
         todayButton.addEventListener('click', function () {
-            dateInput.valueAsDate = new Date();
+            dateInput.valueAsDate = today();
             triggerFilter();
         });
 
         // Event listener for the "Create" button
         createButton.addEventListener('click', function () {
+            createButton.classList.add('active');
             openEditModal(null);
         });
 
@@ -511,6 +533,7 @@
     function closeEditModal() {
         hideSaveSpinner();
         document.getElementById('editOverlay').style.display = 'none';
+        document.querySelector('#createButton').classList.remove('active');
     }
 
     function showSaveSpinner() {
