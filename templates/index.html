@@ -369,6 +369,8 @@
                 pendingDatesButton.classList.remove('active');
                 if (globalSearchDate && globalSearchDate.getDate() === today().getDate()) {
                     todayButton.classList.add('active');
+                } else {
+                    todayButton.classList.remove('active');
                 }
             }
 
