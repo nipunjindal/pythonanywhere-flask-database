@@ -29,7 +29,6 @@ def read_csv_data(csv_path='data/data.csv'):
 def save_csv_data(csv_data, csv_path='data/data.csv'):
     # Save CSV data using Pandas
     csv_data.to_csv(csv_path, index=False)
-
     # Update the CSV data in session
     csv_data_json = csv_data.to_json(orient='records')
     session['csv_data'] = csv_data_json
@@ -63,6 +62,10 @@ def edit():
     party_name = request.form['editPartyName']
     next_date = request.form['editNextDate']
     work_done = request.form.get('editWorkDone', '')
+
+    # Replace backticks (`) with escape sequence (\`) in osn_no and party_name
+    osn_no = replace_backticks(osn_no)
+    party_name = replace_backticks(party_name)
 
     # Convert the next date to the desired format (MM/DD/YY)
     datetime_obj = datetime.datetime.strptime(next_date, "%Y-%m-%d")
@@ -102,6 +105,10 @@ def edit():
     }
 
     return jsonify(response_data)
+
+
+def replace_backticks(value):
+    return value.replace('`', r'\`')
 
 
 if __name__ == '__main__':
